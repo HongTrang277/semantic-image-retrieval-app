@@ -9,9 +9,8 @@ public class userBO {
 
     // Nghiệp vụ Đăng ký
     public boolean registerUser(user newUser) {
-        // --- ĐÂY LÀ CHỖ ĐỂ VIẾT LOGIC NGHIỆP VỤ (BUSINESS LOGIC) ---
         
-        // Ví dụ 1: Kiểm tra password có đủ dài không?
+
         if (newUser.getPassword().length() < 6) {
             System.out.println("Password quá ngắn!");
             return false; 

@@ -1,6 +1,6 @@
 package com.dut.project.controller;
 
-import com.dut.project.dao.userDAO;
+import com.dut.project.bo.userBO;
 import com.dut.project.model.user;
 
 import javax.servlet.ServletException;
@@ -15,7 +15,7 @@ import java.io.IOException;
 @WebServlet("/login")
 public class loginController extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private userDAO userDAO = new userDAO();
+    private userBO userBO = new userBO();
 
     // Xử lý khi User bấm nút Login (Method POST)
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
@@ -27,27 +27,27 @@ public class loginController extends HttpServlet {
         String u = request.getParameter("username");
         String p = request.getParameter("password");
         
-        user user = userDAO.checkLogin(u, p);
+        user account = userBO.checkLogin(u, p);
         
-        if (user != null) {
+        if (account != null) {
             // Đăng nhập thành công -> Lưu vào Session
             HttpSession session = request.getSession();
-            session.setAttribute("account", user);
+            session.setAttribute("account", account);
             
             // Tạm thời in ra màn hình trình duyệt
             response.setContentType("text/html;charset=UTF-8");
             response.getWriter().println("<h1>Đăng nhập thành công!</h1>");
-            response.getWriter().println("<h2>Xin chào: " + user.getFullName() + "</h2>");
+            response.getWriter().println("<h2>Xin chào: " + account.getFullName() + "</h2>");
         } else {
             // Đăng nhập thất bại -> Quay lại trang login và báo lỗi
             request.setAttribute("message", "Sai tên đăng nhập hoặc mật khẩu!");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("loginPage.jsp").forward(request, response);
         }
     }
     
     // Xử lý khi User gõ link /login trực tiếp (Method GET)
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+        request.getRequestDispatcher("loginPage.jsp").forward(request, response);
     }
 }

@@ -1,6 +1,6 @@
 package com.dut.project.controller;
 
-import com.dut.project.dao.userDAO;
+import com.dut.project.bo.userBO;
 import com.dut.project.model.user;
 
 import javax.servlet.ServletException;
@@ -13,7 +13,7 @@ import java.io.IOException;
 @WebServlet("/register")
 public class registerController extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private userDAO userDAO = new userDAO();
+    private userBO userBO = new userBO();
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -26,15 +26,14 @@ public class registerController extends HttpServlet {
         
         user newUser = new user(u, p, f);
         
-        boolean success = userDAO.registerUser(newUser);
+        boolean success = userBO.registerUser(newUser);
         
         if (success) {
-            // Đăng ký thành công -> Chuyển sang trang login để đăng nhập
             request.setAttribute("message", "Đăng ký thành công! Vui lòng đăng nhập.");
-            request.getRequestDispatcher("loginPage.jsp").forward(request, response);
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         } else {
-            // Đăng ký thất bại (Trùng tên) -> Báo lỗi
-            request.setAttribute("error", "Tên đăng nhập đã tồn tại hoặc lỗi hệ thống!");
+            // Nếu BO trả về false (do trùng tên hoặc pass ngắn...)
+            request.setAttribute("error", "Đăng ký thất bại (Trùng tên hoặc mật khẩu < 6 ký tự)");
             request.getRequestDispatcher("register.jsp").forward(request, response);
         }
     }
