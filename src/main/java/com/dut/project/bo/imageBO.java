@@ -9,7 +9,7 @@ public class imageBO {
     private imageDAO imageDAO = new imageDAO();
 
     // 1. Nghiệp vụ: Thêm ảnh mới
-    public boolean addImage(image img) {
+    public int addImage(image img) {
         
         if (img.getStatus() == null || img.getStatus().isEmpty()) {
             img.setStatus("PENDING");
@@ -18,11 +18,15 @@ public class imageBO {
         // Logic 2: Kiểm tra đường dẫn file có rỗng không?
         if (img.getFilePath() == null || img.getFilePath().trim().isEmpty()) {
             System.out.println("Lỗi: Đường dẫn ảnh không được để trống!");
-            return false;
+            return -1;
         }
 
         // Sau khi kiểm tra ok hết mới gọi DAO
         return imageDAO.addImage(img);
+    }
+    
+    public String getImageStatus(int imageId) {
+    	return imageDAO.getImageStatus(imageId);
     }
 
     // 2. Nghiệp vụ: Lấy danh sách ảnh theo trạng thái (Cho Worker dùng)
@@ -42,5 +46,11 @@ public class imageBO {
         } else {
             System.out.println("Lỗi: Trạng thái không hợp lệ! (" + newStatus + ")");
         }
+    }
+    public List<image> getPendingAndMarkAsRunning(int limit) {
+        if (limit <= 0 || limit > 100) {
+            limit = 10; 
+        }
+        return imageDAO.getPendingAndMarkAsRunning(limit);
     }
 }
