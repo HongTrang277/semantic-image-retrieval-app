@@ -45,8 +45,11 @@ public class UploadController extends HttpServlet {
 			List<FileItem> formItems = upload.parseRequest(request);
 			for(FileItem item : formItems) {
 				if(!item.isFormField()) {
-					String fileName = new File(item.getName()).getName();
+					String fullFileName = item.getName(); 
+					System.out.println("File ảnh: " + fullFileName);
+				    String fileName = java.nio.file.Paths.get(fullFileName).getFileName().toString();
 					String filePath = uploadPath + File.separator + fileName;
+					System.out.println("File ảnh lưu: " + filePath);
 					File storeFile = new File(filePath);
 					item.write(storeFile);
 					
@@ -76,5 +79,4 @@ public class UploadController extends HttpServlet {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
 	}
-
 }
