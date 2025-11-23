@@ -46,7 +46,6 @@ public class UploadController extends HttpServlet {
 			for(FileItem item : formItems) {
 				if(!item.isFormField()) {
 					String fullFileName = item.getName(); 
-					System.out.println("File ảnh: " + fullFileName);
 				    String fileName = java.nio.file.Paths.get(fullFileName).getFileName().toString();
 					String filePath = uploadPath + File.separator + fileName;
 					System.out.println("File ảnh lưu: " + filePath);
@@ -66,11 +65,11 @@ public class UploadController extends HttpServlet {
 					} else {
 						System.err.println("Lỗi lưu DB cho file: " + fileName);
 					}
-					
 				}
 			}
 			if(successCount > 0) {
-	            response.sendRedirect("upload_status.jsp?ids=" + successfulIds.toString());
+	            response.sendRedirect("HongTrang_them.jsp?ids=" + successfulIds.toString()); 
+	            //Phần ni nếu hồng trang làm thì sửa lại nhe, nó tùy vào cái view mà hồng trang sẽ hiển thị trạng thái ảnh á
 	        } else {
 	            throw new Exception("Lỗi: Không có ảnh nào được tải lên hoặc lưu metadata thành công.");
 	        }
