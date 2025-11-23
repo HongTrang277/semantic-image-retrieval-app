@@ -10,6 +10,7 @@
         input { display: block; margin: 10px 0; padding: 8px; width: 250px; }
         .error { color: red; }
     </style>
+    
 </head>
 <body>
     <h2>Đăng ký thành viên mới</h2>

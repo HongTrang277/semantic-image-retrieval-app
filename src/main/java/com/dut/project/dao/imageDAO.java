@@ -5,6 +5,7 @@ import com.dut.project.utils.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class imageDAO {
 
@@ -62,5 +63,46 @@ public class imageDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    public List<image> getImagesByIds(List<Integer> imageIds) {
+        List<image> images = new ArrayList<>();
+        if (imageIds == null || imageIds.isEmpty()) {
+            return images;
+        }
+
+        StringJoiner joiner = new StringJoiner(",");
+        for (Integer id : imageIds) {
+            joiner.add("?");
+        }
+        
+        // Lưu ý: Cột trong DB vẫn là 'image_id' (theo SQL bạn gửi lúc đầu)
+        String sql = "SELECT * FROM images WHERE image_id IN (" + joiner.toString() + ")";
+
+        try (Connection connection =  DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            int index = 1;
+            for (Integer id : imageIds) {
+                statement.setInt(index++, id);
+            }
+
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                image img = new image(); // Sử dụng class 'image' của bạn
+                
+                // MAP DỮ LIỆU: Cột DB 'image_id' -> Model 'id'
+                img.setId(rs.getInt("image_id")); 
+                
+                img.setUserId(rs.getInt("user_id"));
+                img.setFilePath(rs.getString("file_path"));
+                img.setStatus(rs.getString("status"));
+                img.setUploadTime(rs.getTimestamp("upload_time"));
+                
+                images.add(img);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return images;
     }
 }

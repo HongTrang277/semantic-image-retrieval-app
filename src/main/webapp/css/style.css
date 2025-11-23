@@ -1,0 +1,59 @@
+@charset "UTF-8";
+   body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; text-align: center; }
+        
+        /* Form Styles */
+        .upload-group { margin-bottom: 20px; border: 2px dashed #ccc; padding: 20px; text-align: center; border-radius: 5px; }
+        .upload-group:hover { border-color: #007bff; background-color: #f9fcff; }
+        
+        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; }
+
+        /* Khu vực hiển thị thông báo (Log) */
+        #server-log {
+            width: 100%;
+            height: 100px;
+            background-color: #222;
+            color: #0f0; /* Màu xanh lá giống màn hình hacker */
+            font-family: 'Consolas', monospace;
+            padding: 10px;
+            box-sizing: border-box;
+            border-radius: 5px;
+            resize: vertical;
+            margin-top: 20px;
+            /*display: none; /* Ẩn mặc định, hiện khi có tin nhắn */
+        }
+
+        /* Lưới ảnh (Image Grid) */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .grid-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            aspect-ratio: 1; /* Hình vuông */
+        }
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .grid-item:hover img { transform: scale(1.1); }
+        .status-badge {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            padding: 4px;
+        }
