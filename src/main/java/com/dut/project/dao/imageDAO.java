@@ -95,6 +95,10 @@ public class imageDAO {
     	
     	try {
     		conn = DBConnection.getConnection();
+    		if (conn == null) {
+    	        // Nếu không có kết nối, throw lỗi để xử lý hoặc trả về ngay lập tức
+    	        throw new SQLException("Không thể thiết lập kết nối DB."); 
+    	    }
     		conn.setAutoCommit(false);
     		
     		String sql = "SELECT image_id, user_id, file_path, upload_time FROM images " +

@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String URL = "jdbc:mysql://localhost:3307/semantic_search_db";
+    private static final String URL = "jdbc:mysql://localhost:3306/semantic_search_db";
     private static final String USER = "root"; 
     private static final String PASS = "123456789"; 
 

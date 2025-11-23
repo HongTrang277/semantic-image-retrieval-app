@@ -9,7 +9,6 @@ public class AppContextListener implements ServletContextListener {
 
     private WorkerScheduler scheduler;
 
-    // Khởi động hệ thống Worker khi ứng dụng web được triển khai
     @Override
     public void contextInitialized(ServletContextEvent sce) {
     	ImageIO.scanForPlugins(); 
@@ -23,7 +22,6 @@ public class AppContextListener implements ServletContextListener {
         scheduler.startScheduling(); 
     }
 
-    // Đóng hệ thống Worker khi ứng dụng web ngừng chạy (Tomcat tắt)
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         if (scheduler != null) {
