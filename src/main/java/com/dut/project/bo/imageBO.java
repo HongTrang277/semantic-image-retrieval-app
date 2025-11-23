@@ -39,10 +39,10 @@ public class imageBO {
     }
 
     // 3. Nghiệp vụ: Cập nhật trạng thái (Cho Worker dùng sau khi AI xử lý xong)
-    public void updateStatus(int imageId, String newStatus) {
+    public void updateStatusAndFilePath(int imageId, String newStatus, String newPath) {
         // Logic: Chỉ cho phép cập nhật các trạng thái hợp lệ
         if (newStatus.equals("PENDING") || newStatus.equals("SUCCESS") || newStatus.equals("FAILED")) {
-            imageDAO.updateStatus(imageId, newStatus);
+            imageDAO.updateStatusAndFilePath(imageId, newStatus, newPath);
         } else {
             System.out.println("Lỗi: Trạng thái không hợp lệ! (" + newStatus + ")");
         }

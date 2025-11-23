@@ -59,13 +59,14 @@ public class imageDAO {
     }
 
     // 3. Hàm cập nhật trạng thái (Module 4 - Worker sẽ gọi hàm này sau khi gửi sang AI xong)
-    public void updateStatus(int imageId, String newStatus) {
-        String sql = "UPDATE images SET status = ? WHERE image_id = ?";
+    public void updateStatusAndFilePath(int imageId, String newStatus, String newPath) {
+    	String sql = "UPDATE images SET status = ?, file_path = ? WHERE image_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, newStatus);
-            ps.setInt(2, imageId);
+            ps.setString(2, newPath);
+            ps.setInt(3, imageId);
             ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();

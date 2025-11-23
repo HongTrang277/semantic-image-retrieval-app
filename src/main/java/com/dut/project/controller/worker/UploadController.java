@@ -18,7 +18,7 @@ import java.util.List;
 
 @WebServlet("/upload")
 public class UploadController extends HttpServlet {
-	private static final String UPLOAD_DIRECTORY = "uploads/raw";
+	private static final String UPLOAD_DIRECTORY = "uploads";
 	private final imageBO imageBO = new imageBO();
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
@@ -51,7 +51,7 @@ public class UploadController extends HttpServlet {
 					String filePath = uploadPath + File.separator + fileName;
 					System.out.println("File ảnh lưu: " + filePath);
 					File storeFile = new File(filePath);
-					item.write(storeFile);
+					item.write(storeFile); //Ghi nội dung vào file vật lý
 					
 					image newImage = new image(userId, filePath, "PENDING");
 					

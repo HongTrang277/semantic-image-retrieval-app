@@ -18,32 +18,33 @@ public class ImageProcessingWorker implements Runnable{
 	}
 	public void run() {
 		String finalStatus = "SUCCESS";
+		File rawImageFile = null;
+		File webpImage = null;
 		try {
 			int imageId = imageToProcess.getId();
 			int userId = imageToProcess.getUserId();
 			String filePath = imageToProcess.getFilePath();
 			
-			// --- Giai đoạn 1: Kiểm tra File ---
-			File imageFile = new File(filePath);
-			if (!imageFile.exists()) {
+			rawImageFile = new File(imageToProcess.getFilePath());
+			if (!rawImageFile.exists()) {
                 throw new Exception("Lỗi File I/O: File ảnh không tồn tại: " + filePath);
             }
 			
-			// --- Giai đoạn 2: Gọi AI (Xử lý nặng) ---
-            System.out.println("Worker ID " + imageId + " - Đang xử lý: " + imageFile.getName());
+			webpImage = ImageConvert.convertToWebp(rawImageFile);
+            System.out.println("Worker ID " + imageId + " - Đang xử lý: " + webpImage.getName());
             
-            // GOI API CHÍNH XÁC: Worker bị BLOCK tại đây
-            apiClient.callExtract(userId, imageId, imageFile);
+            apiClient.callExtract(String.valueOf(userId), String.valueOf(imageId), webpImage);
             
             System.out.println("Worker ID " + imageId + " - Hoàn thành xử lý AI.");
 		}catch (Exception e) {
-            // --- Xử lý Lỗi ---
             System.err.println("LỖI (Job " + imageToProcess.getId() + "): " + e.getMessage());
             finalStatus = "FAILED";
 		}finally {
-            // --- Giai đoạn 3: Cập nhật Trạng thái ---
-            // Đảm bảo Job không bị kẹt ở trạng thái RUNNING
-            imageBO.updateStatus(imageToProcess.getId(), finalStatus);
+			if(rawImageFile != null && rawImageFile.exists()) {
+				rawImageFile.delete();
+			}
+			String pathForDB = imageToProcess.getFilePath();
+            imageBO.updateStatusAndFilePath(imageToProcess.getId(), finalStatus, pathForDB);
         }
 	}
 }

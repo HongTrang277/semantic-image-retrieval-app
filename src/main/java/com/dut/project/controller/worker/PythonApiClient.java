@@ -1,81 +1,69 @@
 package com.dut.project.controller.worker;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 
 public class PythonApiClient {
-	private static final String BASE_URL = "http://localhost:5000/api/v1";
-	
-	private final HttpClient httpClient;
-	
-	public PythonApiClient() {
-		this.httpClient = HttpClient.newBuilder()
-				.connectTimeout(java.time.Duration.ofSeconds(10)).build();
-	}
-	
-	public void callExtract(int userId, int imageId, File imageFile) throws Exception{
-		String boundary = UUID.randomUUID().toString();
-		
-		HttpRequest.BodyPublisher bodyPublisher = buildMultipartBody(
-	            userId, imageId, imageFile, boundary
-	        );
-		
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(BASE_URL + "/extract"))
-				.header("Content-Type", "multipart/form-data; boundary=" + boundary)
-				.timeout(Duration.ofSeconds(120))
-				.POST(bodyPublisher)
-				.build();
-		System.out.println("Gửi request POST /extract cho ảnh ID: " + imageId);
-		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-		
-		if(response.statusCode() != 200) {
-			throw new Exception("API /extract thất bại! Status: " + response.statusCode() + ", Response: " + response.body());
-		}
-		
-	}
-	
-	private HttpRequest.BodyPublisher buildMultipartBody(int userId, int imageId, File file, String boundary) throws IOException{
-		List<byte[]> byteArrays = new ArrayList<>();
-		String header = "--" + boundary + "\r\n";
-        String footer = "\r\n--" + boundary + "--\r\n";
+    private static final String BASE_URL = "http://160.30.129.168:8386";
+    
+    public void callExtract(String userId, String imageId, File imageFile) throws Exception {
+        String boundary = "----" + System.currentTimeMillis();
         
-     // Thêm trường text user_id
-        String userIdPart = header + 
-            "Content-Disposition: form-data; name=\"user_id\"\r\n\r\n" + 
-            userId + "\r\n";
-        byteArrays.add(userIdPart.getBytes());
-        
-        // Thêm trường text image_id
-        String imageIdPart = header + 
-            "Content-Disposition: form-data; name=\"image_id\"\r\n\r\n" + 
-            imageId + "\r\n";
-        byteArrays.add(imageIdPart.getBytes());
+        URL url = new URL(BASE_URL + "/extract");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        conn.setRequestProperty("Accept", "application/json");
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
 
-        // Thêm trường file
-        String filePartHeader = header +
-            "Content-Disposition: form-data; name=\"file\"; filename=\"" + file.getName() + "\"\r\n" +
-            "Content-Type: application/octet-stream\r\n\r\n";
-        byteArrays.add(filePartHeader.getBytes());
-        //Đọc nội dung file
-        byteArrays.add(Files.readAllBytes(file.toPath())); // Nội dung file
-        byteArrays.add("\r\n".getBytes());
-        
-        byteArrays.add(footer.getBytes());
+        try (OutputStream outputStream = conn.getOutputStream();
+             PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"), true)) {
+            
+            writer.append("--").append(boundary).append("\r\n");
+            writer.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n");
+            writer.append(userId).append("\r\n");
+            writer.flush();
 
-        // Trả về BodyPublisher
-        return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
-	}
+            writer.append("--").append(boundary).append("\r\n");
+            writer.append("Content-Disposition: form-data; name=\"image_id\"\r\n\r\n");
+            writer.append(imageId).append("\r\n");
+            writer.flush();
+
+            writer.append("--").append(boundary).append("\r\n");
+            writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"").append(imageFile.getName()).append("\"\r\n");
+            writer.append("Content-Type: ").append(Files.probeContentType(imageFile.toPath())).append("\r\n");
+            writer.append("Content-Transfer-Encoding: binary\r\n\r\n");
+            writer.flush();
+
+            Files.copy(imageFile.toPath(), outputStream);
+            outputStream.flush();
+
+            writer.append("\r\n");
+            writer.append("--").append(boundary).append("--\r\n");
+            writer.flush();
+        }
+        
+        int responseCode = conn.getResponseCode();
+        
+        StringBuilder response = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                    responseCode == 200 ? conn.getInputStream() : conn.getErrorStream(), 
+                    "UTF-8"))) {
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine);
+            }
+        }
+
+
+        if (responseCode != 200) {
+            throw new Exception("API /extract thất bại! Status: " + responseCode + ", Response: " + response.toString());
+        }
+        
+        System.out.println("API /extract thành công!");
+    }
 }
