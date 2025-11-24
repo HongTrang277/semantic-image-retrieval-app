@@ -159,9 +159,9 @@ public class imageDAO {
         return batch;
     }
     public List<image> getImagesByIds(List<Integer> imageIds) {
-        List<image> images = new ArrayList<>();
+        List<image> sortedImages = new ArrayList<>();
         if (imageIds == null || imageIds.isEmpty()) {
-            return images;
+            return sortedImages;
         }
 
         StringJoiner joiner = new StringJoiner(",");
@@ -169,10 +169,9 @@ public class imageDAO {
             joiner.add("?");
         }
         
-        // Lưu ý: Cột trong DB vẫn là 'image_id' (theo SQL bạn gửi lúc đầu)
         String sql = "SELECT * FROM images WHERE image_id IN (" + joiner.toString() + ")";
 
-        try (Connection connection =  DBConnection.getConnection();
+        try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
             int index = 1;
@@ -181,23 +180,33 @@ public class imageDAO {
             }
 
             ResultSet rs = statement.executeQuery();
+            
+            // Dùng Map để lưu tạm kết quả từ DB: Key = ID, Value = Image Object
+            java.util.Map<Integer, image> tempMap = new java.util.HashMap<>();
+            
             while (rs.next()) {
-                image img = new image(); // Sử dụng class 'image' của bạn
-                
-                // MAP DỮ LIỆU: Cột DB 'image_id' -> Model 'id'
+                image img = new image();
                 img.setId(rs.getInt("image_id")); 
-                
                 img.setUserId(rs.getInt("user_id"));
                 img.setFilePath(rs.getString("file_path"));
                 img.setStatus(rs.getString("status"));
                 img.setUploadTime(rs.getTimestamp("upload_time"));
                 
-                images.add(img);
+                tempMap.put(img.getId(), img);
             }
+            
+            // QUAN TRỌNG: Duyệt lại theo danh sách imageIds ban đầu (đã sort theo score)
+            // để lấy object từ Map ra -> Đảm bảo thứ tự hiển thị
+            for (Integer id : imageIds) {
+                if (tempMap.containsKey(id)) {
+                    sortedImages.add(tempMap.get(id));
+                }
+            }
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return images;
+        return sortedImages;
     }
     public List<image> getRecentImagesByUserId(int userId, int limit) {
         List<image> list = new ArrayList<>();

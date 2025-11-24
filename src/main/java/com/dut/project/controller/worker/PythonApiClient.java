@@ -1,17 +1,38 @@
 package com.dut.project.controller.worker;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PythonApiClient {
     private static final String BASE_URL = "http://160.30.129.168:8386";
+    
+    // Class nội bộ để lưu trữ tạm kết quả từ JSON phục vụ việc sort
+    private static class SearchResultItem implements Comparable<SearchResultItem> {
+        int id;
+        double score;
+
+        public SearchResultItem(int id, double score) {
+            this.id = id;
+            this.score = score;
+        }
+
+        // Sắp xếp giảm dần theo Score
+        @Override
+        public int compareTo(SearchResultItem other) {
+            return Double.compare(other.score, this.score);
+        }
+    }
     
     public void callExtract(String userId, String imageId, File imageFile) throws Exception {
         String boundary = "----" + System.currentTimeMillis();
@@ -63,6 +84,8 @@ public class PythonApiClient {
                 response.append(responseLine);
             }
         }
+        
+        System.out.println("DEBUG: Raw JSON from AI Server: " + response.toString());
 
 
         if (responseCode != 200) {
@@ -101,22 +124,18 @@ public class PythonApiClient {
         conn.setRequestProperty("Accept", "application/json"); 
         conn.setDoOutput(true);
 
-        // Tạo body request
         String encodedQuery = java.net.URLEncoder.encode(query, "UTF-8");
         String urlParameters = "user_id=" + userId + "&query=" + encodedQuery + "&top_k=" + topK;
 
-        // Gửi request
         try (OutputStream os = conn.getOutputStream()) {
             byte[] input = urlParameters.getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
-            os.flush(); // Bắt buộc phải flush()
+            os.flush();
         }
 
-        // Kiểm tra mã phản hồi và Đọc response (kể cả response lỗi)
         int responseCode = conn.getResponseCode();
         StringBuilder response = new StringBuilder();
         
-        // Chọn luồng đọc: InputStream cho 2xx (thành công), ErrorStream cho 4xx/5xx (lỗi)
         java.io.InputStream stream;
         try {
             stream = conn.getInputStream();
@@ -131,38 +150,58 @@ public class PythonApiClient {
             }
         }
         
-        // Nếu không phải 200 OK, ném lỗi và kèm theo nội dung phản hồi
         if (responseCode != HttpURLConnection.HTTP_OK) {
             throw new IOException("Server trả về lỗi: " + responseCode + ". Chi tiết: " + response.toString());
         }
 
-        // Parse kết quả (chỉ chạy khi responseCode == 200)
-        return extractIdsFromJson(response.toString());
+        // Xử lý JSON trả về
+        return processSearchResponse(response.toString());
     }
 
-    // Hàm tách số ID từ JSON trả về
-    // Cấu trúc JSON: { "data": { "results": [ { "image_id": "1", ... } ] } }
-    private List<Integer> extractIdsFromJson(String jsonResponse) {
-        List<Integer> ids = new ArrayList<>();
-        
-        // Regex tìm chuỗi: "image_id": "1" hoặc "image_id": 1
-        // Giải thích Regex:
-        // \"image_id\"  : Tìm chính xác key "image_id"
-        // \s*:\s* : Dấu hai chấm và khoảng trắng tùy ý
-        // \"?           : Dấu ngoặc kép mở (có thể có hoặc không)
-        // (\d+)         : Nhóm cần lấy (các chữ số)
-        // \"?           : Dấu ngoặc kép đóng (có thể có hoặc không)
-        Pattern p = Pattern.compile("\"image_id\"\\s*:\\s*\"?(\\d+)\"?");
-        Matcher m = p.matcher(jsonResponse);
-        
-        while(m.find()) {
-            try {
-                // m.group(1) là phần số nằm trong dấu ngoặc đơn (\d+)
-                ids.add(Integer.parseInt(m.group(1)));
-            } catch (NumberFormatException e) {
-                // Bỏ qua nếu không phải số hợp lệ
+
+    private List<Integer> processSearchResponse(String jsonResponse) {
+        List<SearchResultItem> items = new ArrayList<>();
+        List<Integer> finalIds = new ArrayList<>();
+
+        try {
+            Gson gson = new Gson();
+            JsonObject root = gson.fromJson(jsonResponse, JsonObject.class);
+            
+            // Đi vào path: data -> results
+            if (root.has("data") && root.get("data").isJsonObject()) {
+                JsonObject dataObj = root.getAsJsonObject("data");
+                if (dataObj.has("results") && dataObj.get("results").isJsonArray()) {
+                    JsonArray resultsArray = dataObj.getAsJsonArray("results");
+
+                    for (JsonElement elem : resultsArray) {
+                        JsonObject itemObj = elem.getAsJsonObject();
+                        
+                        // Lấy ID và Score
+                        // Lưu ý: JSON trả về image_id là String "1299" -> cần parse int
+                        int id = Integer.parseInt(itemObj.get("image_id").getAsString());
+                        double score = itemObj.get("similarity_score").getAsDouble();
+
+                        // 1. LỌC: Chỉ lấy score > 0
+                        if (score > 0) {
+                            items.add(new SearchResultItem(id, score));
+                        }
+                    }
+                }
             }
+
+            // 2. SẮP XẾP: Giảm dần theo score (dùng Comparable đã định nghĩa ở trên)
+            Collections.sort(items);
+
+            // 3. TRÍCH XUẤT ID: Đưa vào danh sách kết quả cuối cùng
+            for (SearchResultItem item : items) {
+                finalIds.add(item.id);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Lỗi parse JSON search: " + e.getMessage());
         }
-        return ids;
+
+        return finalIds;
     }
 }
