@@ -68,7 +68,7 @@ public class UploadController extends HttpServlet {
 				}
 			}
 			if(successCount > 0) {
-	            response.sendRedirect("HongTrang_them.jsp?ids=" + successfulIds.toString()); 
+	            response.sendRedirect("uploadStatus.jsp?ids=" + successfulIds.toString()); 
 	            //Phần ni nếu hồng trang làm thì sửa lại nhe, nó tùy vào cái view mà hồng trang sẽ hiển thị trạng thái ảnh á
 	        } else {
 	            throw new Exception("Lỗi: Không có ảnh nào được tải lên hoặc lưu metadata thành công.");
