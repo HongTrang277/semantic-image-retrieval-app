@@ -10,8 +10,7 @@ public class ImageProcessingWorker implements Runnable {
     private final imageDAO imgDAO; 
     private final PythonApiClient apiClient;
     
-    // [QUAN TRỌNG] Đã cập nhật về đường dẫn máy của BẠN
-    private static final String BASE_STORAGE_PATH = "D:\\kiki\\DUT\\SEM5\\sem5_hchang\\LTM\\workspace\\SemanticSearchApp\\src\\main\\webapp";
+    private static final String BASE_STORAGE_PATH = "C:\\Users\\ADMIN\\semantic-image-retrieval-app\\src\\main\\webapp";
     private static final String UPLOAD_DIRECTORY = "uploads";
 
     public ImageProcessingWorker(image image) {
@@ -70,8 +69,9 @@ public class ImageProcessingWorker implements Runnable {
             e.printStackTrace();
             finalStatus = "FAILED";
         } finally {
-            // Tạm thời KHÔNG xóa file gốc để tránh lỗi hiển thị khi chưa sync
-            
+        	if(rawImageFile != null && rawImageFile.exists()) {
+				rawImageFile.delete();
+			}
             // 4. Update vào DB
             System.out.println("Worker Update DB -> ID: " + imageToProcess.getId() + " | Status: " + finalStatus + " | Path: " + pathForDB);
             imgDAO.updateStatusAndFilePath(imageToProcess.getId(), finalStatus, pathForDB);
