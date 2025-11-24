@@ -199,4 +199,55 @@ public class imageDAO {
         }
         return images;
     }
+    public List<image> getRecentImagesByUserId(int userId, int limit) {
+        List<image> list = new ArrayList<>();
+        // Lấy ảnh mới nhất lên đầu (ORDER BY upload_time DESC)
+        String sql = "SELECT * FROM images WHERE user_id = ? ORDER BY upload_time DESC LIMIT ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            ps.setInt(2, limit);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                image img = new image();
+                img.setId(rs.getInt("image_id"));
+                img.setUserId(rs.getInt("user_id"));
+                img.setFilePath(rs.getString("file_path"));
+                img.setStatus(rs.getString("status"));
+                img.setUploadTime(rs.getTimestamp("upload_time"));
+                list.add(img);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    public List<image> getIncompleteImagesByUserId(int userId) {
+        List<image> list = new ArrayList<>();
+        // Lấy tất cả ảnh của user mà trạng thái KHÔNG PHẢI LÀ SUCCESS
+        String sql = "SELECT * FROM images WHERE user_id = ? AND status != 'SUCCESS' ORDER BY upload_time DESC";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                image img = new image();
+                img.setId(rs.getInt("image_id"));
+                img.setUserId(rs.getInt("user_id"));
+                img.setFilePath(rs.getString("file_path"));
+                img.setStatus(rs.getString("status"));
+                img.setUploadTime(rs.getTimestamp("upload_time"));
+                list.add(img);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+}
 }

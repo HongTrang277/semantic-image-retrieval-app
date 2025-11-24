@@ -35,9 +35,7 @@ public class loginController extends HttpServlet {
             session.setAttribute("account", account);
             
             // Tạm thời in ra màn hình trình duyệt
-            response.setContentType("text/html;charset=UTF-8");
-            response.getWriter().println("<h1>Đăng nhập thành công!</h1>");
-            response.getWriter().println("<h2>Xin chào: " + account.getFullName() + "</h2>");
+            response.sendRedirect("index.jsp");
         } else {
             // Đăng nhập thất bại -> Quay lại trang login và báo lỗi
             request.setAttribute("message", "Sai tên đăng nhập hoặc mật khẩu!");

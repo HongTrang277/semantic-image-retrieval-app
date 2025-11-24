@@ -1,28 +1,38 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.dut.project.dao.imageDAO" %>
 <%@ page import="com.dut.project.model.image" %>
+<%@ page import="com.dut.project.model.user" %>
 <%@ page import="java.util.*" %>
 <%@ page import="java.io.File" %>
 
 <%
-    // 1. LẤY DỮ LIỆU TỪ CONTROLLER (URL: ?ids=1,2,3)
+    // 1. Kiểm tra đăng nhập
+    user currentUser = (user) session.getAttribute("account");
+    if (currentUser == null) {
+        response.sendRedirect("loginPage.jsp");
+        return;
+    }
+
+    // 2. Xử lý hiển thị danh sách ảnh
     String idsParam = request.getParameter("ids");
     List<image> imageList = new ArrayList<>();
+    imageDAO dao = new imageDAO();
     
     if (idsParam != null && !idsParam.isEmpty()) {
+        // TRƯỜNG HỢP 1: Vừa upload xong (có tham số ?ids=...)
         try {
             String[] idArray = idsParam.split(",");
             List<Integer> idList = new ArrayList<>();
             for (String s : idArray) {
                 idList.add(Integer.parseInt(s.trim()));
             }
-            
-            // Gọi DAO để lấy thông tin chi tiết các ảnh
-            imageDAO dao = new imageDAO();
             imageList = dao.getImagesByIds(idList);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    } else {
+        // TRƯỜNG HỢP 2: Truy cập lại sau khi tắt tab (Lấy 20 ảnh gần nhất của User)
+    	imageList = dao.getIncompleteImagesByUserId(currentUser.getId());
     }
 %>
 

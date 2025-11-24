@@ -22,9 +22,9 @@ public class UploadController extends HttpServlet {
 	private final imageBO imageBO = new imageBO();
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
-		user currentUser = (user) request.getSession().getAttribute("user");
+		user currentUser = (user) request.getSession().getAttribute("account");
 		if(currentUser == null) {
-			response.sendRedirect("login.jsp");
+			response.sendRedirect("loginPage.jsp");
 			return;
 		}
 		int userId = currentUser.getId();
@@ -42,9 +42,15 @@ public class UploadController extends HttpServlet {
 		StringBuilder successfulIds = new StringBuilder(); 
 	    int successCount = 0;
 		try {
+			upload.setHeaderEncoding("UTF-8");
 			List<FileItem> formItems = upload.parseRequest(request);
 			for(FileItem item : formItems) {
 				if(!item.isFormField()) {
+					
+					if (item.getName() == null || item.getName().trim().isEmpty() || item.getSize() == 0) {
+                        continue; 
+                    }
+					
 					String fullFileName = item.getName(); 
 				    String fileName = java.nio.file.Paths.get(fullFileName).getFileName().toString();
 					String filePath = uploadPath + File.separator + fileName;
@@ -71,11 +77,14 @@ public class UploadController extends HttpServlet {
 	            response.sendRedirect("uploadStatus.jsp?ids=" + successfulIds.toString()); 
 	            //Phần ni nếu hồng trang làm thì sửa lại nhe, nó tùy vào cái view mà hồng trang sẽ hiển thị trạng thái ảnh á
 	        } else {
-	            throw new Exception("Lỗi: Không có ảnh nào được tải lên hoặc lưu metadata thành công.");
+	        	request.setAttribute("message", "Bạn chưa chọn file nào để tải lên!");
+                request.getRequestDispatcher("index.jsp").forward(request, response);
 	        }
 		}catch (Exception ex) {
+			ex.printStackTrace(); // In lỗi ra console để debug
             request.setAttribute("message", "Lỗi Upload: " + ex.getMessage());
-            request.getRequestDispatcher("error.jsp").forward(request, response);
+            // 4. Sửa error.jsp -> index.jsp để tránh lỗi 404 nếu chưa có trang error
+            request.getRequestDispatcher("index.jsp").forward(request, response);
         }
 	}
 }
