@@ -42,7 +42,7 @@ public class searchController extends HttpServlet {
         HttpSession session = request.getSession();
         // Integer userId = (Integer) session.getAttribute("userId");
         // if (userId == null) userId = 1; 
-        int userId = 2; // Hardcode tạm để test
+        int userId = 1; // Hardcode tạm để test
 
         List<image> resultImages = new ArrayList<>();
 

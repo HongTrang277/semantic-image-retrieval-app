@@ -6,10 +6,11 @@ import java.io.IOException;
 
 public class ImageConvert {
 	private static final String WEBP_FORMAT = "webp";
-	private static final String UPLOAD_DIRECTORY = "uploads";
+	private static final String BASE_STORAGE_PATH = "C:\\Users\\ADMIN\\semantic-image-retrieval-app\\src\\main\\webapp";
+    private static final String UPLOAD_DIRECTORY = "uploads";
 	
 	public static File convertToWebp(File rawFile) throws IOException{
-		File uploadDir = new File(rawFile.getParentFile().getParentFile(), UPLOAD_DIRECTORY);
+		File uploadDir = new File(BASE_STORAGE_PATH, UPLOAD_DIRECTORY);
 		if(!uploadDir.exists()) {
 			uploadDir.mkdirs();
 		}

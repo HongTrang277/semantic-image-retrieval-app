@@ -231,7 +231,7 @@
                     } else {
                         for (image img : imageList) {
                             // Tách tên file để hiển thị đẹp hơn
-                            String fullPath = img.getFilePath();
+                            String fullPath =img.getFilePath();
                             String fileName = "";
                             if(fullPath != null){
                                 File f = new File(fullPath);
