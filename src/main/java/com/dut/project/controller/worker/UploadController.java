@@ -18,7 +18,7 @@ import java.util.List;
 
 @WebServlet("/upload")
 public class UploadController extends HttpServlet {
-	private static final String BASE_STORAGE_PATH = ":\\Users\\ADMIN\\semantic-image-retrieval-app\\src\\main\\webapp";
+	private static final String BASE_STORAGE_PATH = "C:\\Users\\ADMIN\\semantic-image-retrieval-app\\src\\main\\webapp";
     private static final String UPLOAD_DIRECTORY = "uploads";
 	private final imageBO imageBO = new imageBO();
 	
