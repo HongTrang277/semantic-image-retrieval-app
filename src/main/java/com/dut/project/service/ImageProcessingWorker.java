@@ -10,6 +10,8 @@ public class ImageProcessingWorker implements Runnable{
 	private final image imageToProcess;
 	private final imageBO imageBO;
 	private final PythonApiClient apiClient;
+	private static final String BASE_STORAGE_PATH = "C:\\Users\\ADMIN\\semantic-image-retrieval-app\\src\\main\\webapp";
+    private static final String UPLOAD_DIRECTORY = "uploads";
 	
 	public ImageProcessingWorker(image image) {
 		this.imageToProcess = image;
@@ -20,17 +22,22 @@ public class ImageProcessingWorker implements Runnable{
 		String finalStatus = "SUCCESS";
 		File rawImageFile = null;
 		File webpImage = null;
+		String pathForDB = imageToProcess.getFilePath();
 		try {
 			int imageId = imageToProcess.getId();
 			int userId = imageToProcess.getUserId();
 			String filePath = imageToProcess.getFilePath();
 			
-			rawImageFile = new File(imageToProcess.getFilePath());
+			String absoluteRawPath = BASE_STORAGE_PATH + File.separator + imageToProcess.getFilePath();
+			
+			rawImageFile = new File(absoluteRawPath);
 			if (!rawImageFile.exists()) {
                 throw new Exception("Lỗi File I/O: File ảnh không tồn tại: " + filePath);
             }
 			
 			webpImage = ImageConvert.convertToWebp(rawImageFile);
+			String webpFileName = webpImage.getName();
+			pathForDB = UPLOAD_DIRECTORY + File.separator + webpFileName;
             System.out.println("Worker ID " + imageId + " - Đang xử lý: " + webpImage.getName());
             
             apiClient.callExtract(String.valueOf(userId), String.valueOf(imageId), webpImage);
@@ -43,7 +50,6 @@ public class ImageProcessingWorker implements Runnable{
 			if(rawImageFile != null && rawImageFile.exists()) {
 				rawImageFile.delete();
 			}
-			String pathForDB = imageToProcess.getFilePath();
             imageBO.updateStatusAndFilePath(imageToProcess.getId(), finalStatus, pathForDB);
         }
 	}

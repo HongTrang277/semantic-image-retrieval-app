@@ -18,7 +18,8 @@ import java.util.List;
 
 @WebServlet("/upload")
 public class UploadController extends HttpServlet {
-	private static final String UPLOAD_DIRECTORY = "uploads";
+	private static final String BASE_STORAGE_PATH = "C:\\Users\\ADMIN\\semantic-image-retrieval-app\\src\\main\\webapp";
+    private static final String UPLOAD_DIRECTORY = "uploads";
 	private final imageBO imageBO = new imageBO();
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
@@ -34,7 +35,7 @@ public class UploadController extends HttpServlet {
 			return;
 		}
 		
-		String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIRECTORY;
+		String uploadPath = BASE_STORAGE_PATH + File.separator + UPLOAD_DIRECTORY;
 		File uploadDir = new File(uploadPath);
 		if(!uploadDir.exists()) 
 			uploadDir.mkdirs();
@@ -48,11 +49,12 @@ public class UploadController extends HttpServlet {
 					String fullFileName = item.getName(); 
 				    String fileName = java.nio.file.Paths.get(fullFileName).getFileName().toString();
 					String filePath = uploadPath + File.separator + fileName;
+					String relativeFilePathForDB = UPLOAD_DIRECTORY + File.separator + fileName;
 					System.out.println("File ảnh lưu: " + filePath);
 					File storeFile = new File(filePath);
 					item.write(storeFile); //Ghi nội dung vào file vật lý
 					
-					image newImage = new image(userId, filePath, "PENDING");
+					image newImage = new image(userId, relativeFilePathForDB, "PENDING");
 					
 					int newImageId = imageBO.addImage(newImage);
 					
