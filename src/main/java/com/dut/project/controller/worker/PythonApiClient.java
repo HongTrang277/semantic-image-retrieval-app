@@ -92,16 +92,16 @@ public class PythonApiClient {
 //    [Ví dụ: \x89PNG\r\n\x1A\n\x00\x00\x00IHDR... (Hàng ngàn byte dữ liệu hình ảnh)]
 //    --boundary_string_12345--
     
+ // HÃY THAY THẾ TOÀN BỘ PHƯƠNG THỨC callSearch() BẰNG ĐOẠN CODE SAU
     public List<Integer> callSearch(int userId, String query, int topK) throws IOException {
-    	URL url = new URL(BASE_URL + "/search");
+        URL url = new URL(BASE_URL + "/search");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        conn.setRequestProperty("Accept", "application/json"); // Thêm header Accept
+        conn.setRequestProperty("Accept", "application/json"); 
         conn.setDoOutput(true);
 
         // Tạo body request
-        // Lưu ý: Cần encode query để tránh lỗi với ký tự đặc biệt hoặc tiếng Việt
         String encodedQuery = java.net.URLEncoder.encode(query, "UTF-8");
         String urlParameters = "user_id=" + userId + "&query=" + encodedQuery + "&top_k=" + topK;
 
@@ -109,24 +109,34 @@ public class PythonApiClient {
         try (OutputStream os = conn.getOutputStream()) {
             byte[] input = urlParameters.getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
+            os.flush(); // Bắt buộc phải flush()
         }
 
-        // Kiểm tra mã phản hồi
+        // Kiểm tra mã phản hồi và Đọc response (kể cả response lỗi)
         int responseCode = conn.getResponseCode();
-        if (responseCode != HttpURLConnection.HTTP_OK) {
-            throw new IOException("Server trả về lỗi: " + responseCode);
+        StringBuilder response = new StringBuilder();
+        
+        // Chọn luồng đọc: InputStream cho 2xx (thành công), ErrorStream cho 4xx/5xx (lỗi)
+        java.io.InputStream stream;
+        try {
+            stream = conn.getInputStream();
+        } catch (IOException e) {
+            stream = conn.getErrorStream();
         }
 
-        // Đọc response
-        StringBuilder response = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
             String responseLine;
             while ((responseLine = br.readLine()) != null) {
                 response.append(responseLine.trim());
             }
         }
+        
+        // Nếu không phải 200 OK, ném lỗi và kèm theo nội dung phản hồi
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            throw new IOException("Server trả về lỗi: " + responseCode + ". Chi tiết: " + response.toString());
+        }
 
-        // Parse kết quả
+        // Parse kết quả (chỉ chạy khi responseCode == 200)
         return extractIdsFromJson(response.toString());
     }
 

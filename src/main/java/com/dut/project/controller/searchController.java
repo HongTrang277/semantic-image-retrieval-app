@@ -55,7 +55,7 @@ public class searchController extends HttpServlet {
         if (query != null && !query.trim().isEmpty()) {
             try {
                 // 2. Gọi API Python để lấy danh sách ID ảnh
-                List<Integer> imageIds = apiClient.callSearch(userId, query, 2); // Top 10
+                List<Integer> imageIds = apiClient.callSearch(userId, query, 1000); // Top 10
 
                 // 3. Từ danh sách ID, gọi DAO để lấy thông tin ảnh (đường dẫn file)
                 if (!imageIds.isEmpty()) {

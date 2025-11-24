@@ -331,11 +331,11 @@
                     allDone = false;
                     activeCount++;
                     
-                    fetch('checkStatus?id=' + id)
+                    fetch('checkStatus?id=' + id + '&t=' + new Date().getTime())
                         .then(response => response.json())
                         .then(data => {
                             if (data.status && data.status !== status) {
-                                updateRowUI(id, data.status);
+                            	updateRowUI(id, data.status, data.filePath);
                             }
                         })
                         .catch(err => console.error('Lỗi check status:', err));
@@ -356,11 +356,29 @@
             const icon = document.getElementById('icon-' + id);
             const text = document.getElementById('text-' + id);
             
+            if (newStatus === 'SUCCESS' && newPath) {
+                // Tìm thẻ img trong dòng hiện tại
+                const imgTag = row.querySelector('.img-thumb'); 
+                if (imgTag) {
+                    // Thêm timestamp để tránh cache trình duyệt
+                    imgTag.src = newPath + "?t=" + new Date().getTime();
+                    
+                    // Nếu ảnh đang bị ẩn (do lỗi 404 trước đó), hiện lại
+                    imgTag.style.display = 'block';
+                    
+                    // Cập nhật cả đường dẫn text hiển thị
+                    const pathText = row.querySelector('.filepath');
+                    if(pathText) pathText.innerText = newPath;
+                }
+            }
+            
             row.setAttribute('data-status', newStatus);
 
             // Reset class
             badge.className = 'badge'; 
             icon.className = 'fas';
+            
+            
 
             if (newStatus === 'RUNNING') {
                 badge.classList.add('badge-running');

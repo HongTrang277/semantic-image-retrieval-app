@@ -3,6 +3,7 @@ package com.dut.project.bo;
 import com.dut.project.dao.imageDAO;
 import com.dut.project.model.image;
 import java.util.List;
+import java.util.ArrayList; // Bổ sung import này
 
 public class imageBO {
     
@@ -10,7 +11,6 @@ public class imageBO {
 
     // 1. Nghiệp vụ: Thêm ảnh mới
     public int addImage(image img) {
-        
         if (img.getStatus() == null || img.getStatus().isEmpty()) {
             img.setStatus("PENDING");
         }
@@ -47,10 +47,23 @@ public class imageBO {
             System.out.println("Lỗi: Trạng thái không hợp lệ! (" + newStatus + ")");
         }
     }
+    
     public List<image> getPendingAndMarkAsRunning(int limit) {
         if (limit <= 0 || limit > 100) {
             limit = 10; 
         }
         return imageDAO.getPendingAndMarkAsRunning(limit);
     }
+
+    // --- ĐÂY LÀ HÀM BẠN ĐANG THIẾU ---
+    public image getImageById(int imageId) {
+        List<Integer> ids = new ArrayList<>();
+        ids.add(imageId);
+        List<image> list = imageDAO.getImagesByIds(ids);
+        if (list != null && !list.isEmpty()) {
+            return list.get(0);
+        }
+        return null;
+    }
+    // ---------------------------------
 }

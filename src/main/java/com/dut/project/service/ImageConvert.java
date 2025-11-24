@@ -1,34 +1,46 @@
 package com.dut.project.service;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 public class ImageConvert {
-	private static final String WEBP_FORMAT = "webp";
-	private static final String BASE_STORAGE_PATH = "D:\\kiki\\DUT\\SEM5\\sem5_hchang\\LTM\\workspace\\SemanticSearchApp\\src\\main\\webapp";
-    private static final String UPLOAD_DIRECTORY = "uploads";
-	
-	public static File convertToWebp(File rawFile) throws IOException{
-		File uploadDir = new File(BASE_STORAGE_PATH, UPLOAD_DIRECTORY);
-		if(!uploadDir.exists()) {
-			uploadDir.mkdirs();
-		}
-		
-		String newFileName = rawFile.getName().substring(0, rawFile.getName().lastIndexOf('.')) + "." + WEBP_FORMAT;
-		File webpFile = new File(uploadDir, newFileName);
-		
-		BufferedImage image = ImageIO.read(rawFile);
-		
-		if(image == null) {
-			throw new IOException("Không thể đọc file ảnh: Định dạng không được hỗ trợ hoặc file bị hỏng.");
-		}
-		
-		boolean result = ImageIO.write(image, WEBP_FORMAT, webpFile);
-		if(!result) {
-			throw new IOException("Lỗi ghi file: Không tìm thấy ImageWriter cho định dạng WebP.");
+    // Định dạng ảnh đích
+    private static final String WEBP_FORMAT = "webp"; 
+    
+    public static File convertToWebp(File rawFile) throws IOException {
+        // 1. Xác định thư mục chứa ảnh (chính là thư mục uploads)
+        File parentDir = rawFile.getParentFile();
+        
+        if (parentDir == null || !parentDir.exists()) {
+            throw new IOException("Thư mục cha không tồn tại: " + rawFile.getAbsolutePath());
         }
-		return webpFile;
-	}
-	
+
+        // 2. Tạo tên file mới: abc.jpg -> abc.webp
+        String originalName = rawFile.getName();
+        String baseName = originalName;
+        if (originalName.contains(".")) {
+            baseName = originalName.substring(0, originalName.lastIndexOf('.'));
+        }
+        String newFileName = baseName + "." + WEBP_FORMAT;
+        
+        File webpFile = new File(parentDir, newFileName);
+        
+        // 3. Đọc ảnh gốc
+        BufferedImage image = ImageIO.read(rawFile);
+        if (image == null) {
+            throw new IOException("ImageIO không thể đọc file (định dạng không hỗ trợ hoặc file lỗi): " + rawFile.getName());
+        }
+        
+        // 4. Ghi file WebP
+        // Lưu ý: Nếu lỗi "Can't create ImageOutputStream" vẫn còn, nguyên nhân là do thư viện trong pom.xml
+        boolean result = ImageIO.write(image, WEBP_FORMAT, webpFile);
+        
+        if (!result) {
+            throw new IOException("Lỗi ghi file: Không tìm thấy Writer cho định dạng WebP. Hãy kiểm tra lại pom.xml.");
+        }
+        
+        return webpFile;
+    }
 }
