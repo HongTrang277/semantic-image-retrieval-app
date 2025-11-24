@@ -10,7 +10,7 @@ public class ImageProcessingWorker implements Runnable{
 	private final image imageToProcess;
 	private final imageBO imageBO;
 	private final PythonApiClient apiClient;
-	private static final String BASE_STORAGE_PATH = "C:\\Users\\ADMIN\\semantic-image-retrieval-app\\src\\main\\webapp";
+	private static final String BASE_STORAGE_PATH = "D:\\kiki\\DUT\\SEM5\\sem5_hchang\\LTM\\workspace\\SemanticSearchApp\\src\\main\\webapp";
     private static final String UPLOAD_DIRECTORY = "uploads";
 	
 	public ImageProcessingWorker(image image) {
@@ -22,7 +22,9 @@ public class ImageProcessingWorker implements Runnable{
 		String finalStatus = "SUCCESS";
 		File rawImageFile = null;
 		File webpImage = null;
+		
 		String pathForDB = imageToProcess.getFilePath();
+		
 		try {
 			int imageId = imageToProcess.getId();
 			int userId = imageToProcess.getUserId();
@@ -37,7 +39,7 @@ public class ImageProcessingWorker implements Runnable{
 			
 			webpImage = ImageConvert.convertToWebp(rawImageFile);
 			String webpFileName = webpImage.getName();
-			pathForDB = UPLOAD_DIRECTORY + File.separator + webpFileName;
+			pathForDB = UPLOAD_DIRECTORY + "/" + webpFileName;
             System.out.println("Worker ID " + imageId + " - Đang xử lý: " + webpImage.getName());
             
             apiClient.callExtract(String.valueOf(userId), String.valueOf(imageId), webpImage);

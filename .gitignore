@@ -21,4 +21,4 @@ Thumbs.db
 
 5. Bỏ qua thư mục ảnh thật (Vì nặng, ai cần test thì tự copy vào)
 
-/uploads/
+src/main/webapp/uploads/

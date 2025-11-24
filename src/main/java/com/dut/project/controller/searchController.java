@@ -40,11 +40,17 @@ public class searchController extends HttpServlet {
         
         // Lấy user_id từ Session (Giả sử user đã login). 
         HttpSession session = request.getSession();
-        // Integer userId = (Integer) session.getAttribute("userId");
-        // if (userId == null) userId = 1; 
-        int userId = 1; // Hardcode tạm để test
+        user currentUser = (user) session.getAttribute("account");
+        
+        int userId = 1; // ID mặc định (nếu chưa đăng nhập hoặc demo)
+        
+        if (currentUser != null) {
+            userId = currentUser.getId();
+        }
 
         List<image> resultImages = new ArrayList<>();
+        
+        System.out.println("DEBUG: Đang tìm kiếm với Query: " + query + " | UserID: " + userId);
 
         if (query != null && !query.trim().isEmpty()) {
             try {

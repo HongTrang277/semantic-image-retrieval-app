@@ -18,7 +18,7 @@ import java.util.List;
 
 @WebServlet("/upload")
 public class UploadController extends HttpServlet {
-	private static final String BASE_STORAGE_PATH = "C:\\Users\\ADMIN\\semantic-image-retrieval-app\\src\\main\\webapp";
+	private static final String BASE_STORAGE_PATH = "D:\\kiki\\DUT\\SEM5\\sem5_hchang\\LTM\\workspace\\SemanticSearchApp\\src\\main\\webapp";
     private static final String UPLOAD_DIRECTORY = "uploads";
 	private final imageBO imageBO = new imageBO();
 	
@@ -55,7 +55,7 @@ public class UploadController extends HttpServlet {
 					String fullFileName = item.getName(); 
 				    String fileName = java.nio.file.Paths.get(fullFileName).getFileName().toString();
 					String filePath = uploadPath + File.separator + fileName;
-					String relativeFilePathForDB = UPLOAD_DIRECTORY + File.separator + fileName;
+					String relativeFilePathForDB = UPLOAD_DIRECTORY + "/" + fileName;
 					System.out.println("File ảnh lưu: " + filePath);
 					File storeFile = new File(filePath);
 					item.write(storeFile); //Ghi nội dung vào file vật lý

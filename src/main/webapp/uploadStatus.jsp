@@ -260,9 +260,29 @@
                     <tr id="row-<%= img.getId() %>" data-status="<%= img.getStatus() %>">
                         <td><strong>#<%= img.getId() %></strong></td>
                         <td>
-                            <img src="uploads/<%= fileName %>" class="img-thumb" alt="Img" 
-                                 onerror="this.src='https://via.placeholder.com/60?text=Wait...'">
-                        </td>
+						    <% 
+						        // Logic xử lý đường dẫn giống trang Search
+						        String displayPath = "";
+						        if (fullPath != null) {
+						            // 1. Chuẩn hóa dấu gạch chéo
+						            String cleanPath = fullPath.replace("\\", "/");
+						            
+						            // 2. Đảm bảo đường dẫn bắt đầu đúng từ thư mục uploads/
+						            // Nếu DB lưu đường dẫn tuyệt đối (D:/...), ta cắt lấy phần đuôi
+						            int index = cleanPath.indexOf("uploads/");
+						            if (index != -1) {
+						                displayPath = cleanPath.substring(index);
+						            } else {
+						                displayPath = cleanPath; // Trường hợp DB đã lưu đúng dạng tương đối
+						            }
+						        }
+						    %>
+						    <img src="<%= request.getContextPath() %>/<%= displayPath %>" 
+						         class="img-thumb" 
+						         alt="Img ID <%= img.getId() %>"
+						         style="object-fit: cover; border: 1px solid #ccc;"
+						         onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span style=\'font-size:10px; color:red\'>Chờ đồng bộ...</span>');">
+						</td>
                         <td>
                             <div class="file-meta">
                                 <span class="filename"><%= fileName %></span>
