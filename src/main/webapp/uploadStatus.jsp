@@ -31,8 +31,8 @@
             e.printStackTrace();
         }
     } else {
-        // TRƯỜNG HỢP 2: Truy cập lại sau khi tắt tab (Lấy 20 ảnh gần nhất của User)
-    	imageList = dao.getIncompleteImagesByUserId(currentUser.getId());
+    	// TRƯỜNG HỢP 2: Truy cập lại sau khi tắt tab (Lấy BATCH ẢNH GẦN NHẤT của User)
+    	imageList = dao.getLatestBatchImagesByUserId(currentUser.getId());
     }
 %>
 

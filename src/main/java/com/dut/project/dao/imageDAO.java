@@ -259,4 +259,51 @@ public class imageDAO {
         }
         return list;
 }
+    public List<image> getLatestBatchImagesByUserId(int userId) {
+        List<image> list = new ArrayList<>();
+        // 1. Tìm thời gian upload mới nhất của người dùng
+        String sqlSelectMaxTime = "SELECT MAX(upload_time) as max_time FROM images WHERE user_id = ?";
+        java.sql.Timestamp latestTime = null;
+
+        try (java.sql.Connection conn = com.dut.project.utils.DBConnection.getConnection();
+             java.sql.PreparedStatement psMax = conn.prepareStatement(sqlSelectMaxTime)) {
+            
+            psMax.setInt(1, userId);
+            java.sql.ResultSet rsMax = psMax.executeQuery();
+            if (rsMax.next()) {
+                latestTime = rsMax.getTimestamp("max_time");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return list; 
+        }
+
+        if (latestTime == null) {
+            return list; // Không tìm thấy ảnh nào
+        }
+
+        // 2. Chọn tất cả ảnh có cùng thời gian upload mới nhất đó
+        String sqlSelectBatch = "SELECT * FROM images WHERE user_id = ? AND upload_time = ? ORDER BY image_id ASC";
+        
+        try (java.sql.Connection conn = com.dut.project.utils.DBConnection.getConnection();
+             java.sql.PreparedStatement psBatch = conn.prepareStatement(sqlSelectBatch)) {
+            
+            psBatch.setInt(1, userId);
+            psBatch.setTimestamp(2, latestTime);
+            
+            java.sql.ResultSet rs = psBatch.executeQuery();
+            while (rs.next()) {
+                image img = new image();
+                img.setId(rs.getInt("image_id"));
+                img.setUserId(rs.getInt("user_id"));
+                img.setFilePath(rs.getString("file_path"));
+                img.setStatus(rs.getString("status"));
+                img.setUploadTime(rs.getTimestamp("upload_time"));
+                list.add(img);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
