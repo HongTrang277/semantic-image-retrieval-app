@@ -16,7 +16,7 @@ import java.util.List;
 
 public class PythonApiClient {
     //private static final String BASE_URL = "http://160.30.129.168:8386";
-    private static final String BASE_URL = "http://localhost:8386";
+    private static final String BASE_URL = "http://160.30.129.168:8386";
     
     // Class nội bộ để lưu trữ tạm kết quả từ JSON phục vụ việc sort
     private static class SearchResultItem implements Comparable<SearchResultItem> {
