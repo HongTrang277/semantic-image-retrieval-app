@@ -30,20 +30,17 @@ public class ImageProcessingWorker implements Runnable {
             int imageId = imageToProcess.getId();
             int userId = imageToProcess.getUserId();
             
-            // Xử lý đường dẫn đầu vào
             String currentDbPath = imageToProcess.getFilePath();
             if(currentDbPath.startsWith("uploads/") || currentDbPath.startsWith("uploads\\")) {
                 currentDbPath = currentDbPath.substring(8); 
             }
             
-            // Tìm file ảnh gốc theo đường dẫn máy bạn
             String absoluteRawPath = BASE_STORAGE_PATH + File.separator + UPLOAD_DIRECTORY + File.separator + currentDbPath;
             
             System.out.println("Worker đang tìm file tại: " + absoluteRawPath);
             
             rawImageFile = new File(absoluteRawPath);
             if (!rawImageFile.exists()) {
-                // Fallback tìm ở thư mục gốc nếu logic trên sai
                 rawImageFile = new File(BASE_STORAGE_PATH + File.separator + imageToProcess.getFilePath());
                 if (!rawImageFile.exists()) {
                      throw new Exception("Không tìm thấy file ảnh gốc trên ổ cứng: " + absoluteRawPath);
@@ -73,7 +70,6 @@ public class ImageProcessingWorker implements Runnable {
 				rawImageFile.delete();
 			}
             // 4. Update vào DB
-            System.out.println("Worker Update DB -> ID: " + imageToProcess.getId() + " | Status: " + finalStatus + " | Path: " + pathForDB);
             imgDAO.updateStatusAndFilePath(imageToProcess.getId(), finalStatus, pathForDB);
         }
     }

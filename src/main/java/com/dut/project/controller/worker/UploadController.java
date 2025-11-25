@@ -77,7 +77,6 @@ public class UploadController extends HttpServlet {
 			}
 			if(successCount > 0) {
 	            response.sendRedirect("uploadStatus.jsp?ids=" + successfulIds.toString()); 
-	            //Phần ni nếu hồng trang làm thì sửa lại nhe, nó tùy vào cái view mà hồng trang sẽ hiển thị trạng thái ảnh á
 	        } else {
 	        	request.setAttribute("message", "Bạn chưa chọn file nào để tải lên!");
                 request.getRequestDispatcher("index.jsp").forward(request, response);
@@ -85,7 +84,6 @@ public class UploadController extends HttpServlet {
 		}catch (Exception ex) {
 			ex.printStackTrace(); // In lỗi ra console để debug
             request.setAttribute("message", "Lỗi Upload: " + ex.getMessage());
-            // 4. Sửa error.jsp -> index.jsp để tránh lỗi 404 nếu chưa có trang error
             request.getRequestDispatcher("index.jsp").forward(request, response);
         }
 	}

@@ -17,27 +17,23 @@ public class CheckStatusController extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException{
 		response.setContentType("application/json");
+		
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
 		
 		String imageIdStr = request.getParameter("id");
 		
-		// Tìm đoạn try-catch và sửa lại như sau:
 		try {
 		    int imageId = Integer.parseInt(imageIdStr);
 		    
-		    // SỬA ĐOẠN NÀY: Gọi hàm lấy full thông tin ảnh thay vì chỉ lấy status
-		    image img = imageBO.getImageById(imageId); // Hàm vừa thêm ở Bước 1
+		    image img = imageBO.getImageById(imageId); 
 		    
 		    if (img == null) {
 		        out.print("{\"status\":\"NOT_FOUND\", \"id\":" + imageId + "}");
 		    } else {
-		        // Trả về cả đường dẫn mới (filePath)
-		        // Lưu ý: Cần xử lý dấu gạch chéo cho JSON hợp lệ
 		        String cleanPath = "";
 		        if(img.getFilePath() != null) {
 		             cleanPath = img.getFilePath().replace("\\", "/");
-		             // Nếu DB lưu full path ổ cứng, cắt lấy phần uploads/ trở đi
 		             int idx = cleanPath.indexOf("uploads/");
 		             if (idx != -1) cleanPath = cleanPath.substring(idx);
 		        }
@@ -47,6 +43,14 @@ public class CheckStatusController extends HttpServlet{
 		        out.print("\"id\":" + imageId + ",");
 		        out.print("\"filePath\":\"" + cleanPath + "\""); // Thêm dòng này
 		        out.print("}");
+		        
+		        //Trả về kiểu dữ liệu JSON, tức là kiểu đối tượng có dạng: 
+		        // {
+		        //  "status": "DONE"
+		        //  "id": 101
+		        // "filePath": ...
+		        //}
+		        //Tức là nó đang gửi đối tượng Image
 		    }
 		} catch (NumberFormatException e) {
 		    out.print("{\"status\":\"ERROR\", \"message\":\"Invalid Image ID\"}");

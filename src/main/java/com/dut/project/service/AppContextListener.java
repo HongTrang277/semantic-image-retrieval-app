@@ -3,7 +3,7 @@ import javax.servlet.ServletContextEvent;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-
+//thực hiện các tác vụ khởi tạo và dọn dẹp khi ứng dụng web bắt đầu hoặc kết thúc.
 @WebListener
 public class AppContextListener implements ServletContextListener {
 
