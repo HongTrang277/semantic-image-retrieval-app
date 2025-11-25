@@ -10,7 +10,7 @@ public class ImageProcessingWorker implements Runnable {
     private final imageDAO imgDAO; 
     private final PythonApiClient apiClient;
     
-    private static final String BASE_STORAGE_PATH = "C:\\Users\\ADMIN\\semantic-image-retrieval-app\\src\\main\\webapp";
+    private static final String BASE_STORAGE_PATH = "D:\\kiki\\DUT\\SEM5\\sem5_hchang\\LTM\\workspace\\SemanticSearchApp\\src\\main\\webapp";
     private static final String UPLOAD_DIRECTORY = "uploads";
 
     public ImageProcessingWorker(image image) {
