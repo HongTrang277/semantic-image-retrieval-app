@@ -30,7 +30,7 @@ public class registerController extends HttpServlet {
         
         if (success) {
             request.setAttribute("message", "Đăng ký thành công! Vui lòng đăng nhập.");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("loginPage.jsp").forward(request, response);
         } else {
             // Nếu BO trả về false (do trùng tên hoặc pass ngắn...)
             request.setAttribute("error", "Đăng ký thất bại (Trùng tên hoặc mật khẩu < 6 ký tự)");
