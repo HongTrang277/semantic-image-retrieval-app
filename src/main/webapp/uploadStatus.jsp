@@ -31,8 +31,8 @@
             e.printStackTrace();
         }
     } else {
-        // TRƯỜNG HỢP 2: Truy cập lại sau khi tắt tab (Lấy 20 ảnh gần nhất của User)
-    	imageList = dao.getIncompleteImagesByUserId(currentUser.getId());
+    	// TRƯỜNG HỢP 2: Truy cập lại sau khi tắt tab (Lấy BATCH ẢNH GẦN NHẤT của User)
+    	imageList = dao.getLatestBatchImagesByUserId(currentUser.getId());
     }
 %>
 
@@ -314,6 +314,9 @@
     </div>
 
     <script>
+    
+   	 	const CONTEXT_PATH = "<%= request.getContextPath() %>";
+   	 	
         // Lấy tất cả dòng có data-status
         const rows = document.querySelectorAll('tr[data-status]');
         
@@ -331,11 +334,12 @@
                     allDone = false;
                     activeCount++;
                     
-                    fetch('checkStatus?id=' + id + '&t=' + new Date().getTime())
-                        .then(response => response.json())
+                    fetch(CONTEXT_PATH + '/checkStatus?id=' + id + '&t=' + new Date().getTime()) 
+                    .then(response => response.json())
                         .then(data => {
+                            // Cần đảm bảo rằng data.filePath được truyền vào function
                             if (data.status && data.status !== status) {
-                            	updateRowUI(id, data.status, data.filePath);
+                            	updateRowUI(id, data.status, data.filePath); // data.filePath được truyền
                             }
                         })
                         .catch(err => console.error('Lỗi check status:', err));
@@ -350,22 +354,26 @@
             }
         }
 
-        function updateRowUI(id, newStatus) {
+        function updateRowUI(id, newStatus, newPath) {
             const row = document.getElementById('row-' + id);
             const badge = document.getElementById('badge-' + id);
             const icon = document.getElementById('icon-' + id);
             const text = document.getElementById('text-' + id);
             
-            if (newStatus === 'SUCCESS' && newPath) {
+            // FIX: newPath được truyền vào và sử dụng để cập nhật ảnh
+            if (newStatus === 'SUCCESS' && newPath) { 
                 // Tìm thẻ img trong dòng hiện tại
-                const imgTag = row.querySelector('.img-thumb'); 
+                const imgTag = row.querySelector('.img-thumb');
                 if (imgTag) {
-                    // Thêm timestamp để tránh cache trình duyệt
-                    imgTag.src = newPath + "?t=" + new Date().getTime();
-                    
+                    // FIX: Thêm CONTEXT_PATH vào đường dẫn ảnh và timestamp để tránh cache trình duyệt
+                    imgTag.src = CONTEXT_PATH + "/" + newPath + "?t=" + new Date().getTime(); 
                     // Nếu ảnh đang bị ẩn (do lỗi 404 trước đó), hiện lại
                     imgTag.style.display = 'block';
-                    
+                    // Xóa phần tử 'Chờ đồng bộ...' nếu có
+                    const errorSpan = imgTag.nextElementSibling;
+                    if (errorSpan && errorSpan.tagName === 'SPAN' && errorSpan.innerText.includes('đồng bộ')) {
+                        errorSpan.remove();
+                    }
                     // Cập nhật cả đường dẫn text hiển thị
                     const pathText = row.querySelector('.filepath');
                     if(pathText) pathText.innerText = newPath;
@@ -373,13 +381,9 @@
             }
             
             row.setAttribute('data-status', newStatus);
-
             // Reset class
             badge.className = 'badge'; 
             icon.className = 'fas';
-            
-            
-
             if (newStatus === 'RUNNING') {
                 badge.classList.add('badge-running');
                 icon.classList.add('fa-circle-notch', 'fa-spin-custom');
@@ -401,10 +405,8 @@
             const summary = document.getElementById('completion-summary');
             const indicator = document.getElementById('live-indicator');
             const footerText = document.getElementById('status-text');
-
             if (banner.style.display !== 'block') {
                 banner.style.display = 'block';
-                
                 if (hasError) {
                     summary.innerHTML = 'Quá trình kết thúc nhưng có <strong>ảnh bị lỗi</strong>. Hãy kiểm tra lại.';
                     banner.style.background = 'linear-gradient(135deg, #f6c23e 0%, #dda20a 100%)';
@@ -421,6 +423,7 @@
                 clearInterval(pollingInterval);
             }
         }
+
 
         // Thêm CSS animation động
         const styleSheet = document.createElement("style");

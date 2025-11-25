@@ -15,7 +15,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class PythonApiClient {
-    private static final String BASE_URL = "http://160.30.129.168:8386";
+    //private static final String BASE_URL = "http://160.30.129.168:8386";
+    private static final String BASE_URL = "http://localhost:8386";
     
     // Class nội bộ để lưu trữ tạm kết quả từ JSON phục vụ việc sort
     private static class SearchResultItem implements Comparable<SearchResultItem> {
@@ -116,7 +117,7 @@ public class PythonApiClient {
 //    --boundary_string_12345--
     
  // HÃY THAY THẾ TOÀN BỘ PHƯƠNG THỨC callSearch() BẰNG ĐOẠN CODE SAU
-    public List<Integer> callSearch(int userId, String query, int topK) throws IOException {
+    public List<Integer> callSearch(int userId, String query, int topK, double minScore) throws IOException {
         URL url = new URL(BASE_URL + "/search");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
@@ -155,11 +156,11 @@ public class PythonApiClient {
         }
 
         // Xử lý JSON trả về
-        return processSearchResponse(response.toString());
+        return processSearchResponse(response.toString(), minScore);
     }
 
 
-    private List<Integer> processSearchResponse(String jsonResponse) {
+    private List<Integer> processSearchResponse(String jsonResponse, double minScore) {
         List<SearchResultItem> items = new ArrayList<>();
         List<Integer> finalIds = new ArrayList<>();
 
@@ -182,7 +183,7 @@ public class PythonApiClient {
                         double score = itemObj.get("similarity_score").getAsDouble();
 
                         // 1. LỌC: Chỉ lấy score > 0
-                        if (score > 0) {
+                        if (score > minScore) {
                             items.add(new SearchResultItem(id, score));
                         }
                     }

@@ -30,13 +30,30 @@ public class searchController extends HttpServlet {
     private imageDAO imageDAO = new imageDAO();
     private final PythonApiClient apiClient = new PythonApiClient();
     
+ // Ngưỡng mặc định nếu người dùng không chọn
+    private static final double DEFAULT_MIN_SCORE = 0.5;
+    
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         
-        // 1. Lấy từ khóa tìm kiếm từ JSP
+        // 1. Lấy từ khóa tìm kiếm và Ngưỡng điểm tương đồng từ JSP
         String query = request.getParameter("query");
+        String minScoreParam = request.getParameter("minScore"); // Đọc tham số mới
+        
+        double minScore = DEFAULT_MIN_SCORE;
+        if (minScoreParam != null && !minScoreParam.trim().isEmpty()) {
+            try {
+                minScore = Double.parseDouble(minScoreParam);
+                // Đảm bảo minScore nằm trong khoảng hợp lệ (0.0 đến 1.0)
+                if (minScore < 0.0) minScore = 0.0;
+                if (minScore > 1.0) minScore = 1.0;
+            } catch (NumberFormatException e) {
+                System.err.println("Lỗi parse minScore, sử dụng giá trị mặc định.");
+                minScore = DEFAULT_MIN_SCORE;
+            }
+        }
         
         // Lấy user_id từ Session (Giả sử user đã login). 
         HttpSession session = request.getSession();
@@ -50,12 +67,12 @@ public class searchController extends HttpServlet {
 
         List<image> resultImages = new ArrayList<>();
         
-        System.out.println("DEBUG: Đang tìm kiếm với Query: " + query + " | UserID: " + userId);
+        System.out.println("DEBUG: Đang tìm kiếm với Query: " + query + " | UserID: " + userId + " | MinScore: " + minScore);
 
         if (query != null && !query.trim().isEmpty()) {
             try {
-                // 2. Gọi API Python để lấy danh sách ID ảnh
-                List<Integer> imageIds = apiClient.callSearch(userId, query, 1000); // Top 10
+                // SỬA LỖI TẠI ĐÂY: Thêm minScore vào làm tham số thứ tư (Dòng 82)
+                List<Integer> imageIds = apiClient.callSearch(userId, query, 1000, minScore); 
 
                 // 3. Từ danh sách ID, gọi DAO để lấy thông tin ảnh (đường dẫn file)
                 if (!imageIds.isEmpty()) {
