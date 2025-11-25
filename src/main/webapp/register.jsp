@@ -79,8 +79,8 @@
         <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
     </div>
     <div class="mb-8 text-center register-header-title">
-        <h1 class="text-4xl font-extrabold leading-tight">Hệ thống lưu trữ và tìm kiếm hình ảnh thông qua ngữ nghĩa</h1>
-        <p class="text-xl register-header-subtitle mt-2">Dự án cuối kỳ môn Phát triển ứng dụng Web</p>
+        <h1 class="text-4xl font-extrabold leading-tight">Hệ thống quản lý và tra cứu ảnh thông qua ngữ nghĩa</h1>
+
     </div>
 
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden">

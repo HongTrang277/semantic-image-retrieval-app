@@ -65,5 +65,9 @@ public class imageBO {
         }
         return null;
     }
+    
+    public List<image> getAllImagesByUserId(int userId) {
+        return imageDAO.getAllImagesByUserId(userId);
+    }
     // ---------------------------------
 }
