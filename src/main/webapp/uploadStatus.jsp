@@ -309,7 +309,7 @@
 
         <div class="footer-info">
             <span class="live-dot" id="live-indicator"></span> 
-            <span id="status-text">Đang kết nối thời gian thực với Server Worker... (Cập nhật 2s/lần)</span>
+            
         </div>
     </div>
 

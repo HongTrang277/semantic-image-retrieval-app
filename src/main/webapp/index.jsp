@@ -61,6 +61,9 @@
 
                 <div class="flex items-center gap-6">
                     <% if (isLoggedIn) { %>
+                    <a href="uploadHistory" class="hidden md:flex items-center gap-2 text-slate-600 hover:text-brand-600 font-medium transition">
+                            <i class="fas fa-history"></i> Lịch sử Upload
+                        </a>
                         <a href="uploadStatus.jsp" class="hidden md:flex items-center gap-2 text-slate-600 hover:text-brand-600 font-medium transition">
                             <i class="fas fa-tasks"></i> Trạng thái Upload
                         </a>
