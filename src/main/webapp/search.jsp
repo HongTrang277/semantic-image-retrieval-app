@@ -105,10 +105,20 @@
         <h2>Tìm kiếm hình ảnh thông minh</h2>
         <p>Nhập mô tả hình ảnh bạn muốn tìm (Ví dụ: "con mèo đang ngủ", "bãi biển hoàng hôn")</p>
         
-        <form action="search" method="get" class="search-form">
+        <form action="search" method="get" class="search-form"id="searchForm">
             <input type="text" name="query" placeholder="Nhập từ khóa tìm kiếm..." value="${currentQuery}" required>
             <button type="submit">Tìm kiếm</button>
         </form>
+        
+        <div class="slider-container">
+            <div class="slider-label">
+                <span>Ngưỡng tương đồng tối thiểu: <b id="scoreValue">${empty param.minScore ? '0.50' : param.minScore}</b></span>
+                <span>(0.0: Thấp nhất | 1.0: Cao nhất)</span>
+            </div>
+            <input type="range" name="minScore" id="minScoreSlider" min="0.0" max="1.0" step="0.01" 
+                   value="${empty param.minScore ? '0.50' : param.minScore}" form="searchForm"
+                   oninput="document.getElementById('scoreValue').innerText = parseFloat(this.value).toFixed(2)">
+        </div>
         
         <c:if test="${not empty error}">
             <p class="error-msg">${error}</p>
